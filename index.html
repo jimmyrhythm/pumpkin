@@ -1,0 +1,452 @@
+<html>
+  <head>
+    <script src="third.js"></script>
+    <link rel="shortcut icon" type="image/png" href="bf.png">
+
+<style>
+body {
+  font-family:Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+background-color:#a61;
+}
+
+.diva{
+padding:13px;
+margin:13px;
+float:left;
+}
+
+
+h1{
+font-weight: 100;
+}
+
+
+a-scene {
+
+  max-height: 480px;
+  max-width: 480px;
+  float:left;
+}
+
+
+
+#spectatorDiv {float:right;}
+</style>
+
+<title id='pagetitle'>I am Pumpkin</title>
+<meta name="description" content="VR Puppets">
+
+<!-- Facebook Meta Tags -->
+<meta property="og:url" content="https://beingfelt.com/nt/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Pumpkin">
+<meta property="og:description" content="Pumpkin">
+<meta property="og:image" content="https://beingfelt.com/pumpkin/pump.png">
+
+<!-- Twitter Meta Tags -->
+<meta name="twitter:card" content="summary_large_image">
+<meta property="twitter:domain" content="beingfelt.com">
+<meta property="twitter:url" content="https://beingfelt.com/">
+<meta name="twitter:title" content="Pumpkin">
+<meta name="twitter:description" content="Pumpkin">
+<meta name="twitter:image" content="https://beingfelt.com/pumpkin/pump.png">
+
+  </head>
+
+  <body>
+<h1 id='headline'>I am Pumpkin</h1>
+<script  type="text/javascript">
+
+AFRAME.registerShader('test', {
+  schema: {
+    color: {type: 'color', is: 'uniform', default: 'red'},
+    opacity: {type: 'number', is: 'uniform', default: 1.0},
+    timeMsec: {type: 'time', is: 'uniform'}
+    
+  },
+  vertexShader:`
+  varying vec2 vUv;
+  varying vec3 cam;
+  varying vec4 ball;
+  varying vec3 pos;
+  uniform float timeMsec;
+  varying float iTime;
+  void main() {
+  vUv = uv;
+  
+  iTime = timeMsec / 1000.0;
+  cam=cameraPosition;
+  ball= vec4(0,0,0,1);
+  gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+
+  vec4 pp= modelMatrix * vec4(position, 1.0 );
+  vec4 ball= modelMatrix * ball;
+  pos=pp.xyz;
+}`,
+  fragmentShader:
+`
+  //Use medium precision.
+  precision highp float;
+
+
+
+float smoothmin(float a, float b, float k) {
+    float h = clamp(0.5 + 0.5*(a-b)/k, 0.0, 1.0);
+    return mix(a, b, h) - k*h*(1.0-h);
+}
+
+  
+float smoothsum(){
+  return 1.;
+}
+
+vec4 smoon(vec4 a, vec4 b, float k) {
+  
+  float h = clamp(0.5 + 0.5*(a.w-b.w)/k, 0.0, 1.0);
+
+  float w= smoothmin(a.w,b.w,k);
+  float x= mix(a.x, b.x, h) - k*h*(1.0-h);
+  float y= mix(a.y, b.y, h) - k*h*(1.0-h);
+  float z= mix(a.z, b.z, h) - k*h*(1.0-h);
+  return vec4(normalize(vec3(x,y,z)),w);
+}
+
+float smooshmin(float a, float b, float k) {
+float eq=1./abs((a-b)*15.);
+return min(a,b)+eq;
+
+}
+
+float onion( in float sdf, in float thickness )
+{
+    return abs(sdf)-thickness;
+}
+
+vec2 rot(vec2 p, float rad){ 
+         float s = sin(rad);
+        float c = cos(rad);
+        mat2 m = mat2(c, -s, s, c);
+        return p*m;}
+
+
+
+  // This receives the color value from the schema, which becomes a vec3 in the shader.
+  uniform vec3 color;
+  uniform float timeMsec;
+  // This receives the opacity value from the schema, which becomes a number.
+  uniform float opacity;
+  varying vec2 vUv;
+  varying vec3 cam;
+  varying vec4 ball;
+  varying vec3 pos;
+  varying float iTime;
+ float phi=1.618;
+
+  float lines(vec3 p){
+  float l=1.-mod(floor(p.y*10.),10.);
+         l=max(l,1.-mod(floor(p.x*10.),10.));
+         l=max(l,1.-mod(floor(p.z*10.),10.));
+         return l;
+}
+
+float boxD( vec3 p, vec3 b )
+{
+  vec3 q = abs(p) - b;
+  return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
+}
+ 
+float inbox( vec3 p)
+{
+  vec3 q = fract(p);
+  q=min(q,vec3(1.)-q)-.5;
+  return -(length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0));
+}
+ 
+
+float box2D(vec2 p,vec2 box){
+return length(max((abs(p)-box),vec2(0.)));
+}
+
+float pri( vec3 p, vec2 h )
+{
+  vec3 q = abs(p);
+  return max(q.z-h.y,max(q.x*0.866025+p.y*0.5,-p.y)-h.x*0.5);
+}
+
+float D(vec3 p){
+  
+  float pump=distance(vec3(p.x,p.y,p.z),vec3(0,0,0))-10.;
+
+  float pc=atan(p.x,p.z);
+
+  pump+=1.-abs(sin(pc*9.+iTime)*.5)*(length(vec2(p.x,p.z)*.15));
+
+  //ridges
+  float bigShell=onion(pump,.2);
+  vec3 gp=vec3(p.x,p.y,p.z-iTime*.78);
+  float tg=dot(sin(gp*2.),cos(gp.zxy*2.))+(.75+sin(iTime+gp.x*1.1312)*.5); 
+  
+
+float nos=pri(p-vec3(0,1.,10.), vec2(1.,4.));
+bigShell=max(-nos,bigShell);
+float eye=pri(p-vec3(3,3,10.), vec2(1.5,4.));
+bigShell=max(-eye,bigShell);
+eye=pri(p-vec3(-3,3,10.), vec2(1.5,4.));
+bigShell=max(-eye,bigShell);
+float mouth= distance(vec3(p.x,p.y*2.,p.z),vec3(0,-2.5,9.+sin(iTime)))-2.;
+
+bigShell=max(-mouth,bigShell);
+
+tg=max(-mouth,tg);
+
+float rod=boxD(vec3(p.x,p.y+1.5,p.z-10.4+sin(iTime)*1.2),vec3(.2,.1,.3))-.2;
+
+
+
+tg=max(tg,pump+.1);
+tg=min(tg,rod);
+
+tg= smoothmin(tg,bigShell,.6);
+
+//tg+=(sin(iTime*314.)*.02)*(sin(iTime)*.5+.5);
+//tg=min(tg,nos);
+return tg;
+
+}
+
+vec3 getNormal(vec3 p){
+float e=1./4096.;
+return normalize(vec3(
+        D(p+vec3(e,0,0)) - D(p-vec3(e,0,0)),
+        D(p+vec3(0,e,0)) - D(p-vec3(0,e,0)),
+        D(p+vec3(0,0,e)) - D(p-vec3(0,0,e))
+        ));
+
+}
+
+
+
+vec3 getWeird(vec3 p){
+    float e=1./4096.;//4096.;
+    return normalize(vec3(
+            e,
+            D(p+vec3(0,0,e)),
+            e
+            ));
+
+}
+
+vec3 getDir(vec3 p){
+  return normalize(vec3(sin(p)*.5+.5))*.6;
+}
+
+
+vec4 NB(vec3 p){
+
+vec3 bp2=vec3(0,1.7+sin(iTime),-1);
+vec3 bp3=vec3(1.5+cos(iTime),0,-.5);
+
+vec4 b1=vec4(normalize(p),length(p)-1.);
+vec4 b2=vec4(p-bp2,distance(p,bp2)-1.);
+vec4 b3=vec4(p-bp3,distance(p,bp3)-1.);
+return smoon(b1,smoon(b2,b3,.991),.991);
+//returns Normal+Distance
+//return vec4(b1.xyz,min(b1.w,b2.w));
+}
+
+  void main () {
+  vec2 uv=vUv*5.+0.55;
+    // Note that this shader doesn't use texture coordinates.
+    vec3 bal=ball.xyz;
+    
+    //bal.x+=sin(iTime*1.)*.4-.3;
+      
+    float rad=.4 ;
+    float travel=0.;    
+    float world=500.;//furthest distance to march
+    vec3 p=vec3(pos.x,pos.y,pos.z);
+    vec3 dir=normalize(p-cam);
+    dir*=.5; //sin(iTime)*.3+1.;//.7;
+    p=cam+dir*.1;
+    float alpha=0.;
+    vec3 col =vec3(.125);
+    for (int i=0;i< 300;i++){
+     
+        float idist=D(p);
+
+        travel+=idist; //update distace traveled. 
+        if (travel>world){
+            //col=vec3(0,1,sin(iTime)*.5+.5);
+            col=vec3(.125);
+            col=mix(col,vec3(.5,0.2,0.2),alpha);
+           // alpha=1.;
+            //vec3(sin(cam.x*5.),abs(pos.z*15.),0.);//vec3(1.);
+            break;
+        }
+
+        //inside, object, backtrack once.
+        //if (idist<0.){p=p+dir*idist;}
+
+        if (idist<.005){
+           //alpha=1.-alpha;
+            vec3 lightdir=vec3(.0,.0,1.);
+            lightdir=mix(lightdir,vec3(1.,1.,0.5),smoothstep(5.7,8.,length(p)) );
+            float light=clamp(dot(lightdir,getNormal(p)),0.,1.);
+            col=vec3(.9,.7,.2);
+            col=mix(col,vec3(.9,.5,.1),smoothstep(9.,9.7,length(p)) );
+
+            col*=light;
+            col=mix(col,vec3(.5,0.2,0.2),alpha);
+            float pc=atan(p.x,p.z);
+            col*=1.-abs(sin(pc*9.)*.5);
+            col=max(col,0.05);
+        break;
+   
+            }
+            //alpha+=0.1;
+            alpha+=0.02;
+            p=p+dir*idist;       
+}
+    // Output to screen
+    gl_FragColor = vec4(col,1);
+    //gl_FragColor = vec4(b,1.);
+  }
+`
+});
+
+</script>
+
+<a-scene embedded rederer="foveationLevel:3;" vr-mode-ui="enabled: false" >
+      <a-assets>
+        <a-mixin id="wire" wireframe="true"  material="opacity:0.9;side:double;color: #0f0 ; "></a-mixin>
+
+        <a-mixin id="green" material="color: green ; emissive:green" ></a-mixin>
+        <a-mixin id="blue" material="color: blue ; emissive:blue" ></a-mixin>
+        <a-mixin id="red" material="color:red; emissive:red" ></a-mixin>
+
+        <a-mixin id="black" material="color: black ; emissive:black" ></a-mixin>
+        <a-mixin id="white" material="color: white ; emissive:white" ></a-mixin>
+
+        <a-mixin id="box" geometry="primitive: box"></a-mixin>
+
+      </a-assets>
+    
+     
+      <a-entity id="rig" position="0 0 17" rotation="-6 0 0" >
+     
+          <a-entity id="words" position="0  3.5 -3 " rotation="-6 0 0"
+          geometry="primitive: plane; width: 14; height: 14; "
+          material="opacity:0.5;shader:test"
+          text="baseline:top;opacity:0.6;wrapCount:20;align:center;font:monoid; color:#b8b; height:4;width:4; value:I am Pumpkin">
+        
+      </a-entity>
+       
+      <a-camera  look-controls="magicWindowTrackingEnabled:false;" wasd-controls="fly: true; speed: 0.3" position="0 1.6 0" >
+        
+        
+      
+      </a-camera></a-entity>
+
+
+      <a-sphere  id="pumpkin"  scale ="300 300 300" rotation ="0 0 0" position="0 0 0" 
+      material="side:back;shader: test;opacity:0.5;" >
+    </a-sphere>
+
+
+      <!--a-sphere  id="p2" scale="5 4 5" segments-width="12" rotation ="0 0 0" position="0,5 1.6 -6" 
+    material="color:#F87217" >
+    </a-sphere>
+    <a-cylinder material="shader: test;" rotation="90 0 0"  segments-radial="3" scale=".07 .02 .07"  position="0 0 1"  ></a-cylinder>
+    <a-cylinder material="shader: test;" rotation="90 0 0"  segments-radial="3" scale=".07 .02 .07"  position="-.15 0.15 1"  ></a-cylinder>
+   <a-cylinder material="shader: test;" rotation="90 0 0"  segments-radial="3" scale=".05 .02 .05"  position="0.15 .15 1"  ></a-cylinder>
+
+
+  <a-cylinder  material="color:green" scale=".25 .5 .25" rotation ="0 0 0" position="0 1 0"></a-cylinder>>
+
+</a-cylinder>  -->
+
+      
+      
+      <a-sky color="#222"></a-sky>
+     
+
+            <a-entity position="5 4 3"  light="type: point; color: #aaa"></a-entity>
+
+  
+            
+    </a-scene>
+
+      <div class="diva">
+      <form id="meme" action="/pumpkin">
+        <label for="title"></label>Title:</label>
+        <input id="title" name="title"/ value="I am Pumpkin"><br>
+        <label for="text">Text:</label>
+        <textarea id="text" rows="8" cols="20" name="text" >I am Pumpkin</textarea><br>
+        <input type="submit" value="Submit">
+      </form> 
+      <ul id='memelist'>
+        <li><a class="pump" href="?text=I+am+Point&title=Here">Click</a></li>
+        <li><a class="pump" href="?title=Worth&text=We+could+%0D%0Ateach+children%0D%0Ato+write+shaders%0D%0Aof+their+feelings.+%0D%0A%0D%0AWhat+is+the+value%0D%0Aof+that%3F">What is this</a></li>
+        <li><a class="pump" href="?text=I+am+Produce&title=Class">Class</a></li>
+        <li><a class="pump" href="?text=I+am+Promise&title=Check">Check</a></li>
+        <li><a class="pump" href="?text=I+am+Poison&title=Counter">Counter</a></li>
+        <li><a class="pump" href="?title=Play+Game&text=I+wish%0D%0Awe+had+more%0D%0Anonviolent+video+games.+Where+instead+of+shooting+your+enemies%2C+you+%0D%0Ateach+them%0D%0Ahow+to%0D%0Adie.+">Play Game</a></li>
+        <li><a class="pump" href="?title=Emoji&text=Pumpkin+has+%0D%0Afour+dimensions+%0D%0Aand+cannot+be+printed.+Any+manufacturing+process+will+yield+only+a+slice+of+pumpkin.+%26%23127875%3B">Emoji</a></li>
+      </ul>
+</div>
+
+  </body>
+
+  
+<script  type="text/javascript">
+var now = new Date().getTime();
+
+//var meme=decodeURI(window.location.hash.substr(1));
+var par = new URLSearchParams(window.location.search);
+var text=par.get('text');
+
+var title=par.get('title');
+if(text){
+var el=document.getElementById("words");
+el.setAttribute("text","value:" + text);      //Aframe will send towards Shader
+if(title){
+var el=document.getElementById("headline");   //Heading 1 At top of page
+el.innerHTML=title; 
+var el=document.getElementById("pagetitle");//Browser tab Label
+el.innerHTML=title;                         //Set to the title parameter
+addmeme();
+
+}
+var el=document.getElementById("text");   //form input
+el.innerHTML=text;  //
+var el=document.getElementById("title");   //form input
+el.value=title;  //
+
+
+}
+
+function addmeme(){
+  link = document.createElement('a');
+  ml=document.body;
+  form = document.getElementById("meme"); 
+        link.href = window.location.search;
+        link.innterHTML=title;
+        ml.appendChild(link);
+        console.log(link);
+}
+
+
+function Favit(){
+favicanv=document.getElementsByClassName('a-canvas')[0];
+favlink = document.createElement('link');
+        favlink.type = 'image/x-icon';
+        favlink.rel = 'shortcut icon';
+        favlink.href = favicanv.toDataURL("image/x-icon");
+        document.getElementsByTagName('head')[0].appendChild(favlink);
+}
+  </script>
+
+
+
+
+</html>
