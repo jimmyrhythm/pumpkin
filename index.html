@@ -9,6 +9,12 @@ body {
 background-color:#a61;
 }
 
+textarea, input{
+text-align:center;
+background-color:#fa6;
+color:#525;
+}
+
 .diva{
 padding:13px;
 margin:13px;
@@ -33,7 +39,7 @@ a-scene {
 #spectatorDiv {float:right;}
 </style>
 
-<title id='pagetitle'>I am Pumpkin</title>
+<title id='pagetitle'>Pumpkin Space</title>
 <meta name="description" content="VR Puppets">
 
 <!-- Facebook Meta Tags -->
@@ -54,7 +60,7 @@ a-scene {
   </head>
 
   <body>
-<h1 id='headline'>I am Pumpkin</h1>
+<h1 id='headline'>Pumpkin Space</h1>
 <script  type="text/javascript">
 
 AFRAME.registerShader('test', {
@@ -167,6 +173,12 @@ float box2D(vec2 p,vec2 box){
 return length(max((abs(p)-box),vec2(0.)));
 }
 
+float sdCone( vec3 p, vec2 c, float h )
+{
+  float q = length(p.xz);
+  return max(dot(c.xy,vec2(q,p.y)),-h-p.y);
+}
+
 float pri( vec3 p, vec2 h )
 {
   vec3 q = abs(p);
@@ -186,7 +198,6 @@ float D(vec3 p){
   vec3 gp=vec3(p.x,p.y,p.z-iTime*.78);
   float tg=dot(sin(gp*2.),cos(gp.zxy*2.))+(.75+sin(iTime+gp.x*1.1312)*.5); 
   
-
 float nos=pri(p-vec3(0,1.,10.), vec2(1.,4.));
 bigShell=max(-nos,bigShell);
 float eye=pri(p-vec3(3,3,10.), vec2(1.5,4.));
@@ -202,14 +213,25 @@ tg=max(-mouth,tg);
 float rod=boxD(vec3(p.x,p.y+1.5,p.z-10.4+sin(iTime)*1.2),vec3(.2,.1,.3))-.2;
 
 
-
 tg=max(tg,pump+.1);
 tg=min(tg,rod);
+tg=min(tg,p.y+sin(iTime)+10.); //floor
+//tg=max(tg,p.y+sin(iTime)*10.);
 
 tg= smoothmin(tg,bigShell,.6);
 
 //tg+=(sin(iTime*314.)*.02)*(sin(iTime)*.5+.5);
 //tg=min(tg,nos);
+//tg=max(tg,p.y+sin(iTime/3.)*8.); //slice
+//tg=max(tg,( p.y+sin(iTime/3.)*8.)-2.); //slice
+//tg=max(tg,(-p.y-sin(iTime/3.)*8.)-2.); //slice
+//float cop= 
+float cor=sdCone(vec3(p.x,p.y+1.5,p.z-10.4+sin(iTime)*1.2),vec2(1.,1.),3.)+.1;
+vec4 q=normalize(vec4(3,iTime,2,4));
+
+
+tg=min(tg,p.y+sin(iTime)+10.); //floor
+//tg= smoothmin(tg,cc,.9);
 return tg;
 
 }
@@ -270,7 +292,7 @@ return smoon(b1,smoon(b2,b3,.991),.991);
     p=cam+dir*.1;
     float alpha=0.;
     vec3 col =vec3(.125);
-    for (int i=0;i< 300;i++){
+    for (int i=0;i< 1300;i++){
      
         float idist=D(p);
 
@@ -337,7 +359,7 @@ return smoon(b1,smoon(b2,b3,.991),.991);
           <a-entity id="words" position="0  3.5 -3 " rotation="-6 0 0"
           geometry="primitive: plane; width: 14; height: 14; "
           material="opacity:0.5;shader:test"
-          text="baseline:top;opacity:0.6;wrapCount:20;align:center;font:monoid; color:#b8b; height:4;width:4; value:I am Pumpkin">
+          text="baseline:top;opacity:0.6;wrapCount:20;align:center;font:monoid; color:#b8b; height:4;width:4; value:Pumpkin Space">
         
       </a-entity>
        
@@ -379,19 +401,23 @@ return smoon(b1,smoon(b2,b3,.991),.991);
       <div class="diva">
       <form id="meme" action="/pumpkin">
         <label for="title"></label>Title:</label>
-        <input id="title" name="title"/ value="I am Pumpkin"><br>
+        <input id="title" name="title"/ value="Pumpkin Space"><br>
         <label for="text">Text:</label>
-        <textarea id="text" rows="8" cols="20" name="text" >I am Pumpkin</textarea><br>
+        <textarea id="text" rows="10" cols="19" name="text" >Pumpkin Space</textarea><br>
         <input type="submit" value="Submit">
       </form> 
       <ul id='memelist'>
-        <li><a class="pump" href="?text=I+am+Point&title=Here">Click</a></li>
-        <li><a class="pump" href="?title=Worth&text=We+could+%0D%0Ateach+children%0D%0Ato+write+shaders%0D%0Aof+their+feelings.+%0D%0A%0D%0AWhat+is+the+value%0D%0Aof+that%3F">What is this</a></li>
-        <li><a class="pump" href="?text=I+am+Produce&title=Class">Class</a></li>
+        <li><a class="pump" href="/pumpkin">Default</a></li>
+        <li><a class="pump" href="?text=I+am+Point!&title=Here">Click</a></li>
+        <li><a class="pump" href="?text=I+am+Product.&title=Class™">Produce</a></li>
+        <li><a class="pump" href="?title=Objectification&text=%2F%2FThere+is+code+here%0D%0A%2F%2FI+am+not+done+with+yet.%0D%0A%0D%0A%2F%2FPumpkin+Incinerator+%0D%0A">dot</a></li>
+        <li><a class="pump" href="?title=Ghost&text=I'd+rather%0D%0Abe+a+writer.++I%0D%0Acould+make+pictures+with+words.+But+I+do+not+want+you+to+just+trust+me.+I+want+you+to+know+I+can+draw+with+just+words.%0D%0AI+wrote+this">Spirit</a></li>
         <li><a class="pump" href="?text=I+am+Promise&title=Check">Check</a></li>
+        <li><a class="pump" href="?text=I stole your dreamcast and I am not sorry. &title=Betrayal">Spiral</a></li>
         <li><a class="pump" href="?text=I+am+Poison&title=Counter">Counter</a></li>
         <li><a class="pump" href="?title=Play+Game&text=I+wish%0D%0Awe+had+more%0D%0Anonviolent+video+games.+Where+instead+of+shooting+your+enemies%2C+you+%0D%0Ateach+them%0D%0Ahow+to%0D%0Adie.+">Play Game</a></li>
-        <li><a class="pump" href="?title=Emoji&text=Pumpkin+has+%0D%0Afour+dimensions+%0D%0Aand+cannot+be+printed.+Any+manufacturing+process+will+yield+only+a+slice+of+pumpkin.+%26%23127875%3B">Emoji</a></li>
+        <li><a class="pump" href="?title=Emoji+🎃&text=Pumpkin+has+%0D%0Afour+dimensions+%0D%0Aand+cannot+be+printed.+Any+manufacturing+process+will+yield+only+a+slice+of+pumpkin.">Emoji</a></li>
+        <li><a class="pump" href="?title=To+Quest+and+Quest+2&text=The%0D%0Aglitches+are%0D%0Amy+sign+that+your+world+isn't+real.%0D%0A%0D%0AI+also+think+we+should+talk+about+lenses.">Eyes</a></li>
       </ul>
 </div>
 
@@ -406,9 +432,12 @@ var par = new URLSearchParams(window.location.search);
 var text=par.get('text');
 
 var title=par.get('title');
+var tb=document.getElementById("text");   //form input
+tb.onkeyup= function(){setword(); };
 if(text){
-var el=document.getElementById("words");
+  var el=document.getElementById("words");
 el.setAttribute("text","value:" + text);      //Aframe will send towards Shader
+
 if(title){
 var el=document.getElementById("headline");   //Heading 1 At top of page
 el.innerHTML=title; 
@@ -417,11 +446,18 @@ el.innerHTML=title;                         //Set to the title parameter
 addmeme();
 
 }
-var el=document.getElementById("text");   //form input
-el.innerHTML=text;  //
+tb.innerHTML=text;  // //form input
 var el=document.getElementById("title");   //form input
 el.value=title;  //
 
+
+}
+
+function setword(){
+  var intext=document.getElementById("text").value;  
+  console.log(intext);
+  var el=document.getElementById("words");
+el.setAttribute("text","value:" + intext);      //Aframe will send towards Shader
 
 }
 
@@ -430,7 +466,7 @@ function addmeme(){
   ml=document.body;
   form = document.getElementById("meme"); 
         link.href = window.location.search;
-        link.innterHTML=title;
+        link.innerHTML=title;
         ml.appendChild(link);
         console.log(link);
 }
