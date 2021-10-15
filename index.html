@@ -21,6 +21,9 @@ margin:13px;
 float:left;
 }
 
+h6{
+  float:clear;
+}
 
 h1{
 font-weight: 100;
@@ -40,21 +43,21 @@ a-scene {
 </style>
 
 <title id='pagetitle'>Pumpkin Space</title>
-<meta name="description" content="VR Puppets">
+<meta name="description" content="3D Pumpkin Memes">
 
 <!-- Facebook Meta Tags -->
 <meta property="og:url" content="https://beingfelt.com/nt/">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Pumpkin">
-<meta property="og:description" content="Pumpkin">
+<meta property="og:title" content="Pumpkin Space">
+<meta property="og:description" content="3D Pumpkin Memes">
 <meta property="og:image" content="https://beingfelt.com/pumpkin/pump.png">
 
 <!-- Twitter Meta Tags -->
 <meta name="twitter:card" content="summary_large_image">
 <meta property="twitter:domain" content="beingfelt.com">
 <meta property="twitter:url" content="https://beingfelt.com/">
-<meta name="twitter:title" content="Pumpkin">
-<meta name="twitter:description" content="Pumpkin">
+<meta name="twitter:title" content="Pumpkin Space">
+<meta name="twitter:description" content="3D Pumpkin Memes">
 <meta name="twitter:image" content="https://beingfelt.com/pumpkin/pump.png">
 
   </head>
@@ -406,19 +409,7 @@ return smoon(b1,smoon(b2,b3,.991),.991);
         <textarea id="text" rows="10" cols="19" name="text" >Pumpkin Space</textarea><br>
         <input type="submit" value="Submit">
       </form> 
-      <ul id='memelist'>
-        <li><a class="pump" href="/pumpkin">Default</a></li>
-        <li><a class="pump" href="?text=I+am+Point!&title=Here">Click</a></li>
-        <li><a class="pump" href="?text=I+am+Product.&title=Class™">Produce</a></li>
-        <li><a class="pump" href="?title=Objectification&text=%2F%2FThere+is+code+here%0D%0A%2F%2FI+am+not+done+with+yet.%0D%0A%0D%0A%2F%2FPumpkin+Incinerator+%0D%0A">dot</a></li>
-        <li><a class="pump" href="?title=Ghost&text=I'd+rather%0D%0Abe+a+writer.++I%0D%0Acould+make+pictures+with+words.+But+I+do+not+want+you+to+just+trust+me.+I+want+you+to+know+I+can+draw+with+just+words.%0D%0AI+wrote+this">Spirit</a></li>
-        <li><a class="pump" href="?text=I+am+Promise&title=Check">Check</a></li>
-        <li><a class="pump" href="?text=I stole your dreamcast and I am not sorry. &title=Betrayal">Spiral</a></li>
-        <li><a class="pump" href="?text=I+am+Poison&title=Counter">Counter</a></li>
-        <li><a class="pump" href="?title=Play+Game&text=I+wish%0D%0Awe+had+more%0D%0Anonviolent+video+games.+Where+instead+of+shooting+your+enemies%2C+you+%0D%0Ateach+them%0D%0Ahow+to%0D%0Adie.+">Play Game</a></li>
-        <li><a class="pump" href="?title=Emoji+🎃&text=Pumpkin+has+%0D%0Afour+dimensions+%0D%0Aand+cannot+be+printed.+Any+manufacturing+process+will+yield+only+a+slice+of+pumpkin.">Emoji</a></li>
-        <li><a class="pump" href="?title=To+Quest+and+Quest+2&text=The%0D%0Aglitches+are%0D%0Amy+sign+that+your+world+isn't+real.%0D%0A%0D%0AI+also+think+we+should+talk+about+lenses.">Eyes</a></li>
-      </ul>
+
 </div>
 
   </body>
@@ -430,6 +421,8 @@ var now = new Date().getTime();
 //var meme=decodeURI(window.location.hash.substr(1));
 var par = new URLSearchParams(window.location.search);
 var text=par.get('text');
+
+var fullpage=par.get('fullpage');
 
 var title=par.get('title');
 var tb=document.getElementById("text");   //form input
@@ -483,6 +476,6 @@ favlink = document.createElement('link');
   </script>
 
 
-
+<!--This is an Automatic Transmission. </-->
 
 </html>
